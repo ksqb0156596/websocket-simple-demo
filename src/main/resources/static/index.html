@@ -79,6 +79,7 @@
             websocket.onclose = function(){
                 $(".main").hide(100);
                 $(".login_btn").show();
+                $('.top').find('span').text(--count);
                 alert("退出成功");
             }
         })
