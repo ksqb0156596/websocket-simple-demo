@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket</title>
+    <script src="js/jquery-1.9.0.min.js"></script>
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap/bootstrap-theme.min.css" rel="stylesheet">
+    <style>
+        .top{
+            position: absolute;
+            width: 100%;
+            background-color: darkgrey;
+            top: 0;
+            height: 50px;
+            color: red;
+        }
+        .login_btn{
+            position: absolute;
+            top: 50px;
+        }
+        .main {
+            position: absolute;
+            top:50px;
+            height:600px;
+            width: 80%;
+            left:50px;
+            right: 50px;
+            background-color: #cdcdcd;
+        }
+        .content{
+            position: absolute;
+            width: 90%;
+            height: 80%;
+            left:20px;
+            right: 20px;
+            background-color: white;
+            color: #0f0f0f;
+            top:10px;
+        }
+        ._input{
+            position: absolute;
+            width: 90%;
+            bottom:50px;
+            background-color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="top">当前在线人数：<span>0</span><a href="#" id="logout" style="position: absolute;right: 10px">退出</a> </div>
+    <div class="login_btn"><button class="btn btn-info">登陆</button></div>
+    <div class="main" style="display: none">
+        <div class="content" ></div>
+        <div class="_input"><input id="in" type="text"/> <button class="btn btn-success">提交</button></div>
+    </div>
+    <script>
+        var websocket = null;
+        var count = 0;
+        $('.btn-info').click(function () {
+            websocket = new WebSocket("ws://localhost:8090/websocket");
+            $('.login_btn').hide();
+            $('.main').show(100);
+            websocket.onopen = function(){
+                alert("链接成功");
+            }
+            websocket.onmessage = function(event){
+                var data = event.data;
+                data = JSON.parse(data);
+                var command = data.command;
+
+                switch (command){
+                    case "init" : count = data.count;$('.top').find('span').text(count);break;
+                    case "add" : $('.top').find('span').text(++count);break;
+                    case "sub" : $('.top').find('span').text(--count);break;
+                    case "message" : $('.content').append("<div>" + data.content + "</div>");break;
+                }
+            }
+            websocket.onclose = function(){
+                $(".main").hide(100);
+                $(".login_btn").show();
+                alert("退出成功");
+            }
+        })
+        $('#logout').click(function(){
+            websocket.close();
+            websocket = null;
+        })
+        $('.btn-success').click(function () {
+            websocket.send($('#in').val());
+        })
+    </script>
+
+</body>
+</html>
